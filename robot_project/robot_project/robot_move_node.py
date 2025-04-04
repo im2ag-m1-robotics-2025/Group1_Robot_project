@@ -10,11 +10,12 @@ import time
 class Create3Controller(Node):
     def __init__(self):
         super().__init__("create3_controller")
+        self.robot_prefix = "Robot4"        
         self.cmd_vel_publisher = self.create_publisher(
-            Twist, "/cmd_vel", QoSProfile(depth=10)
+            Twist, self.robot_prefix+"/cmd_vel", QoSProfile(depth=10)
         )
-        self.undock_client = ActionClient(self, Undock, "/undock")
-        self.dock_client = ActionClient(self, Dock, "/dock")
+        self.undock_client = ActionClient(self, Undock, self.robot_prefix+"/undock")
+        self.dock_client = ActionClient(self, Dock, self.robot_prefix+"/dock")
 
     def undock(self):
         self.get_logger().info("Undocking...")
@@ -36,10 +37,10 @@ class Create3Controller(Node):
         rclpy.spin_until_future_complete(self, result_future)
 
         result = result_future.result()
-        if result.result.is_docked:
+        if not result.result.is_docked:
             self.get_logger().info("Successfully undocked.")
         else:
-                        self.get_logger().error("Failed to undock.")
+            self.get_logger().error("Failed to undock.")
 
     def dock(self):
         self.get_logger().info("Docking...")
